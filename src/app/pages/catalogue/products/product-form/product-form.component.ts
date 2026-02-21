@@ -186,7 +186,7 @@ export class ProductFormComponent implements OnInit {
       // rebatePrice: [Validators.required, Validators.pattern(validators.number)],
       // startDate: [new Date()],
       // endDate: [new Date()],
-      sortOrder: ['', [Validators.required, Validators.pattern(validators.number)]],
+      sortOrder: [0, [Validators.required, Validators.pattern(validators.number)]],
       // productShipeable: [false, [Validators.required]],
       productSpecifications: this.fb.group({
         weight: [''],
@@ -497,6 +497,32 @@ export class ProductFormComponent implements OnInit {
     const controls = this.form.controls;
     for (const name in controls) {
       if (controls[name].invalid) {
+        console.log(`Invalid control: "${name}"`, {
+          value: controls[name].value,
+          errors: controls[name].errors
+        });
+        // Log nested errors for FormArray (e.g. descriptions)
+        if (controls[name]['controls']) {
+          controls[name]['controls'].forEach((ctrl, i) => {
+            if (ctrl.invalid) {
+              console.log(`  -> ${name}[${i}] invalid:`, {
+                value: ctrl.value,
+                errors: ctrl.errors
+              });
+              // Log individual field errors within the group
+              if (ctrl['controls']) {
+                for (const field in ctrl['controls']) {
+                  if (ctrl['controls'][field].invalid) {
+                    console.log(`     -> ${name}[${i}].${field}:`, {
+                      value: ctrl['controls'][field].value,
+                      errors: ctrl['controls'][field].errors
+                    });
+                  }
+                }
+              }
+            }
+          });
+        }
         invalid.push(name);
       }
     }
